@@ -1,5 +1,6 @@
-from time import sleep
+
 from playwright.sync_api import sync_playwright
+from bs4 import BeautifulSoup
 
 # Acesso Moodle
 LNK_LOGIN_MOODLE = "https://www.moodle.fsa.br/login/index.php"
@@ -16,12 +17,13 @@ with sync_playwright() as p:
     # Acesso ao Moodle
     page.goto(LNK_LOGIN_MOODLE)
 
-    username_field = page.locator('//*[@id="username"]')
-    username_field.type(USERNAME)
+    page.fill('//*[@id="username"]', USERNAME)
+    # username_field = page.locator('//*[@id="username"]')
+    # username_field.type(USERNAME)
 
-    password_field = page.locator('//*[@id="password"]')
-    password_field.type(PASSWORD)
-    password_field.press("Enter")
+    page.fill('//*[@id="password"]', PASSWORD)
+    page.press(selector='//*[@id="password"]', key="Enter")
+    # password_field.type(PASSWORD)
 
     # Validaçõa de Acesso
     if page.title() == "Painel":
@@ -31,9 +33,12 @@ with sync_playwright() as p:
         print("Login Mal Sucedido")
 
     # Listar todos os cursos do Moodle
-    cursos = page.locator('a')
+   # cursos = page.locator('a')
     # set(cursos)
 
-    print(cursos.get_attribute('name'))
+    # preciso retirar o class "card-body p-3", uma div que está superior com todos os links
+    html = page.inner_html("card-body p-3", timeout=0)
+    soup = BeautifulSoup(html, 'html.parser')
+    print(soup.prettify())
 
     browser.close()
